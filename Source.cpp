@@ -1,95 +1,105 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
-struct node {
-	int data;
-	node* left, * right;
-	node(int x) {
-		data = x;
-		left = NULL;
-		right = NULL;
-	}
-};
-struct ltnode {
-	struct node** info;
-	struct ltnode* next;
-}*front ,*rear;
-
-
-node* root;
-node* insert(node* x,int data) {
-	if (x == NULL)	return new node(data);
-	if (x->data > data)	x->left = insert(x->left, data);
-	else
-	{
-		x->right = insert(x->right, data);
-	}
-	return x;
-}
-void insert(int data) {
-	root = insert(root, data);
-}
-void inorderr(node* x) {
-	if (x == NULL)	return;
-	inorderr(x->left);
-	cout << x->data << ' ';
-	inorderr(x->right);
-}
-
-void addq(node** x) {
-	ltnode* temp = new ltnode;
-	temp->info = x;
-	temp->next = NULL;
-	if (front == NULL) {
-		front = rear = temp;
-		cout << rear << ' ' << front << '\n';
-		return;
-	}
-	rear->next = temp;
-	rear = rear->next;
-}
-node** dequeue() {
-	if (front == NULL) {
-		return NULL;
-	}
-	node** temp = front->info;
-	front = front->next;
-	return temp;
-}
-
-void levelorderr(node ** root)
+int trackarr[10][30], T = 0,hsh[30];
+void makeknutharray(int i, int j, int val)
 {
-	addq(root);
-	int tracker = 1;
-	cout << "\nleven order \n";
-	while (front != NULL) {
-
-		for (int i = 0; i < tracker; ++i) {
-			node** temp = dequeue();
-			node* x = *temp;
-			if (x != NULL) {
-				cout << x->data<< ' ';
-				addq(&(x->left));	cout << rear <<' '<<front<< '\n';	
-				addq(&(x->right));	cout << rear << ' '<<front<< '\n';
-			}
-			else {
-				addq(NULL); addq(NULL);
-			}
+	trackarr[T][10 + 3*(i-1)+val] = hsh[10 + 3 * (i - 1) + val] = 1;
+	trackarr[T][20 + 3*(j-1)+val] = hsh[20 + 3 * (j - 1) + val] = 1;
+	trackarr[T][3 * (i - 1) + j] = val;
+	hsh[3 * (i - 1) + j] = val;
+	T++;
+}
+void printknutharray()
+{
+	for (int i = 0; i < T; ++i) {
+		for (int j = 1; j < 10; ++j) {
+			cout << trackarr[i][j] << ' ';
 		}
-		cout << "level " <<  tracker << '\n';
-		tracker *= 2;
+		cout << '\t';
+		for (int j = 11; j < 20; ++j) {
+			cout << trackarr[i][j] << ' ';
+		}
+		cout << '\t';
+		for (int j = 21; j < 30; ++j) {
+			cout << trackarr[i][j] << ' ';
+		}
+		cout << '\n';
+	}
+	for (int i = 0; i < 30; ++i)	cout << hsh[i] << ' ';
+	cout << '\n';
+
+}
+void solvesudok()
+{
+	
+	for (int i = 1; i < 10; ++i) {
+		if (!hsh[i]) {
+			int row, column;
+			row = (i - 1) / 3 + 1;
+			column = i - (row - 1) * 3;
+			if (!hsh[10 + (row - 1) * 3 + 1] && !hsh[20 + 3*(column - 1) + 1]) makeknutharray(row, column, 1);
+			
+			else if (!hsh[10 + (row - 1) * 3 + 2] && !hsh[20 + 3*(column - 1) + 2])	makeknutharray(row, column, 2);
+			else if (!hsh[10 + (row - 1) * 3 + 3] && !hsh[20 + 3 * (column - 1) + 3])makeknutharray(row, column, 3);
+		}
 	}
 }
+bool checkvalue(int row, int column, int val)
+{
+	if (hsh[(row - 1) * 3 + column])	return 0;
+	if (hsh[10 + (row - 1) * 3 + val])	return 0;
+	if (hsh[20 + (column - 1) * 3 + val])	return 0;
+	return 1;
+}
+void playsudok()
+{
+	int temphsh[10],countunFilled = 0,row,column,val,invcount = 0;
+	for (int i = 1; i < 10; ++i) {
+		if (!hsh[i])	countunFilled++;
+		temphsh[i] = hsh[i];
 
+	}
+	while (countunFilled) {
+		cout << "row? ";	cin >> row;
+		cout << "column? ";		cin >> column;
+		cout << "val? ";	cin >> val;
+		if (row + column + val < 3 || row + column + val > 9)	break;
+		if (checkvalue(row, column, val)) {
+			makeknutharray(row, column, val);
+			countunFilled--;
+		}
+		else cout << "some invalid move/s " << ++invcount << '\n';
 
+		if (invcount > 3) {
+			cout << "exceeded invalid moves \n"; break;
+		}
+		int k = 1;
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j)	cout << hsh[k++] << ' ';
+			cout << '\n';
+		}
+	}
+	if (!countunFilled)	cout << "\t\tSUCCESS!!!\n\n";
+	else cout << "Try again\n";
+}
 int main()
 {
-	int n;	cin >> n;
-	for (int i = 0; i < n; ++i) {
-		int k;	cin >> k;
-		insert(k);
+	int n, arr[5][5];
+	cin >> n;
+	for (int i = 1; i <= n; ++i) {
+		for (int j = 1; j <= n; ++j) {
+			cin >> arr[i][j];
+			if (arr[i][j]) {
+				makeknutharray(i, j, arr[i][j]);
+			}
+		}
 	}
-	inorderr(root);
-
-	levelorderr(&root);
+	int k = 1;
+	printknutharray();
+	playsudok();
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j)	cout << hsh[k++] << ' ';
+		cout << '\n';
+	}
 	return 0;
 }
