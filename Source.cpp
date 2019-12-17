@@ -8,7 +8,8 @@ void makeknutharray(int i, int j, int val)
 	trackarr[T][3 * (i - 1) + j] = val;
 	hsh[3 * (i - 1) + j] = val;
 	T++;
-}
+} 
+//edited tried to figure out git
 void printknutharray()
 {
 	for (int i = 0; i < T; ++i) {
