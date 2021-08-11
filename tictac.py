@@ -1,4 +1,5 @@
 import os
+import numpy
 
 class TicTac:
     def __init__ (self):
@@ -31,15 +32,27 @@ class TicTac:
             print()
 
     def check_winner (self):
-        for i in range(2,8,2):
-            for j in range(3,8,2):
-                arr[i-2][j-3] = 0
-                if self.s[i][j] == 'X':
-                    arr[i-2][j-3] += 1
-                elif self.s[i][j] == 'O':
-                    arr[i-2][j-3] -= 1
-        return False
+        arr = numpy.zeros((3,3))
+        for i in range(0,3):
+            for j in range(0,3):
+                print(self.s[i*2+2][j*2+3],end = '')
+                if self.s[i*2+2][j*2+3] == 'X':
+                    arr[i][j] += 1
+                elif self.s[i*2+2][j*2+3] == 'O':
+                    arr[i][j] -= 1
+        colsum = numpy.sum(arr,axis=0)
+        rowsum = numpy.sum(arr,axis=1)
+        if rowsum[0] == 3 or rowsum[1] == 3 or rowsum[2] == 3 or rowsum[0] == -3 or rowsum[1] == -3 or rowsum[2] == -3:
+            self.game_over()
+        elif colsum[0] == 3 or colsum[1] == 3 or colsum[2] == 3 or colsum[0] == -3 or colsum[1] == -3 or colsum[2] == -3:
+            self.game_over()
+        elif abs(arr[0][0]+arr[1][1]+arr[2][2]) == 3 or abs(arr[0][2]+arr[1][1]+arr[2][0]) == 3:
+            self.game_over()
+        
+        
+
     def game_over(self):
+        print("\n\n")
         print( "███▀▀▀██ ███▀▀▀███ ███▀█▄█▀███ ██▀▀▀")
         print( "██    ██ ██     ██ ██   █   ██ ██   ")
         print( "██   ▄▄▄ ██▄▄▄▄▄██ ██   ▀   ██ ██▀▀▀")
@@ -51,16 +64,15 @@ class TicTac:
         print( "██     ██   ██  ██  ██▀▀▀ ██▄▄▄▄▄▀▀ ")
         print( "██     ██   ██  █▀  ██    ██     ██ ")
         print( "███▄▄▄███    ▀█▀    ██▄▄▄ ██     ██▄")
+        print("\n\n")
 
 
+if __name__ == "main":
+    t1 = TicTac()
+    t1.show_tictac()
+    t1.play_move(2,0,1)
+    t1.play_move(1,1,1)
+    t1.play_move(0,2,1)
+    t1.show_tictac()
 
-
-t1 = TicTac()
-t1.show_tictac()
-t1.play_move(2,0)
-t1.play_move(1,0,1)
-t1.play_move(0,0)
-t1.show_tictac()
-
-t1.game_over()
-
+    t1.check_winner()
