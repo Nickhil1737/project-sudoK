@@ -35,7 +35,7 @@ class TicTac:
         arr = numpy.zeros((3,3))
         for i in range(0,3):
             for j in range(0,3):
-                print(self.s[i*2+2][j*2+3],end = '')
+                # print(self.s[i*2+2][j*2+3],end = '')
                 if self.s[i*2+2][j*2+3] == 'X':
                     arr[i][j] += 1
                 elif self.s[i*2+2][j*2+3] == 'O':
@@ -66,13 +66,17 @@ class TicTac:
         print( "███▄▄▄███    ▀█▀    ██▄▄▄ ██     ██▄")
         print("\n\n")
 
-
-if __name__ == "main":
+def main():
     t1 = TicTac()
     t1.show_tictac()
-    t1.play_move(2,0,1)
-    t1.play_move(1,1,1)
-    t1.play_move(0,2,1)
-    t1.show_tictac()
+    cnt = 0
+    for _ in range(3):
+        for _ in range(3):
+            t1.show_tictac()
+            print("player "+str(cnt%2+1) + " turn")
+            r = int(input("enter row\t"))
+            c = int(input("enter column\t"))
+            t1.play_move(r,c,cnt%2==1)
+            cnt +=1
+            t1.check_winner()
 
-    t1.check_winner()
