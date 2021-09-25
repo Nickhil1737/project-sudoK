@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
-
+last = None
 # disable all the buttons
 def disable_all_buttons():
 	b1.config(state=DISABLED)
