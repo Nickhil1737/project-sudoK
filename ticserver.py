@@ -1,15 +1,13 @@
 import asyncio
 import websockets
 
-from tictac import TicTac
-
+# from tictac import TicTac
 async def gameon (websocket,path):
-    t1 = TicTac()
     s = await websocket.recv()
-    r = int(s[0])
-    c = int(s[1])
-    t1.play_move(r,c)
-    t1.show_tictac()
+    r = int(s)
+    print(r)
+    # t1.play_move(r,c)
+    # t1.show_tictac()
     r = int(input("enter row\t"))
     c = int(input("enter column\t"))
 

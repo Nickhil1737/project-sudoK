@@ -4,77 +4,98 @@ from tkinter import messagebox
 import tkinter as tk
 import numpy
 
-def b_click(b):
-    global s,clicked,count,root
-    r = -1
-    c = -1
-    for i in range(0,3):
-        for j in range(0,3):
-            if s[i][j] == b:
-                r = i
-                c = j
+from tkinter import *
+import json
+import asyncio
+import websockets
+import threading
 
-    if b["text"] == " " and clicked == True:
-        b["text"] = "X"
-        clicked = False
-        count += 1
-        #self.check_winner()
-    elif b["text"] == " " and clicked == False:
-        b["text"] = "O"
-        clicked = True
-        count += 1
-        #self.checkifwon()
-    else:
-        messagebox.showerror("Tic Tac Toe", "Hey! That box has already been selected\nPick Another Box..." )
-# 3 X 3 tictac
-root = Tk()
-s = []
-root.title('Tic-Tac-Toe')
-clicked = True
-count = 0
-
-for i in range(0,3):
-    s.append([])
-    for j in range(0,3):
-        b = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b))
-        b.grid(row=i, column=j)
-        s[i].append(b)
-root.mainloop()
-
-
+class WebSocketThread (threading.Thread):
+    global buttons,clicked,count,root
+    '''WebSocketThread will make websocket run in an a new thread'''
     
-    #def play_move (self,i,j,flip = False):
-        #self.s[2*i+2][3+j*2] = 'X'
-        #if flip:    self.s[2*i+2][3+j*2] = 'O'
+    # overide self init
+    def __init__(self,name):
+        threading.Thread.__init__(self)
+        self.name=name
+        self.USERS = set()
+        print("Start thread", self.name)
 
-    #def show_tictac (self):
-        #for row in self.s:
-            #for col in row:
-                #print(col,end='')
-            #print()
+    # overide run method
+    def run(self):
+        # must set a new loop for asyncio
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        # setup a server
+        asyncio.get_event_loop().run_until_complete(websockets.serve(self.listen, 'localhost', 6789))
+        # keep thread running
+        asyncio.get_event_loop().run_forever()
 
-def check_winner ():
-    global s,clicked,count,root
-    arr = numpy.zeros((3,3))
-    for i in range(0,3):
-        for j in range(0,3):
-            # print(self.s[i*2+2][j*2+3],end = '')
-            if s[i][j]["text"] == 'X':
-                arr[i][j] += 1
-            elif s[i][j]["text"] == 'O':
-                arr[i][j] -= 1
-    colsum = numpy.sum(arr,axis=0)
-    rowsum = numpy.sum(arr,axis=1)
-    if rowsum[0] == 3 or rowsum[1] == 3 or rowsum[2] == 3 or rowsum[0] == -3 or rowsum[1] == -3 or rowsum[2] == -3:
-        self.game_over()
-    elif colsum[0] == 3 or colsum[1] == 3 or colsum[2] == 3 or colsum[0] == -3 or colsum[1] == -3 or colsum[2] == -3:
-        self.game_over()
-    elif abs(arr[0][0]+arr[1][1]+arr[2][2]) == 3 or abs(arr[0][2]+arr[1][1]+arr[2][0]) == 3:
-        self.game_over()
+    # listener    
+    async def listen(self, websocket, path):
+        # x = buttons[0]
+        # b_click(x)
+        '''listenner is called each time new client is connected
+        websockets already ensures that a new thread is run for each client'''
+
+        print("listen: ", websocket)
+
+        # register new client #
+        self.USERS.add(websocket)
+        await self.notify_users()
+
+        # this loop to get massage from client #
+        while True:
+            try:
+                msg = await websocket.recv()
+                if msg is None:
+                    break
+                await self.handle_message(msg)
+
+            except websockets.exceptions.ConnectionClosed:
+                print("close: ", websocket)
+                break
+
+        self.USERS.remove(websocket)
+        await self.notify_users()
+    
+    # message handler        
+    async def handle_message(self,data):
+        print("handle_message: ", data)
+        cnt = 0
+        for x in buttons:
+            if cnt == int(data):
+                b_click(x)
+                break
+            cnt += 1
+
+    # example of an action
+    # action: notify
+    async def notify_users(self):
+        '''notify the number of current connected clients'''
+        if self.USERS: # asyncio.wait doesn't accept an empty list
+            message = json.dumps({'type': 'users', 'count': len(self.USERS)})
+            await asyncio.wait([user.send(message) for user in self.USERS])
+
+    # action: action
+    async def action(self):
+        #self.tic.blick(0,1)
+        '''this is an action which will be executed when user presses on button'''
+        if self.USERS: # asyncio.wait doesn't accept an empty list
+            message = json.dumps({'type': 'activation', 'count':'true'})
+            await asyncio.wait([user.send(message) for user in self.USERS])
+
+    # expose action
+    def do_activate(self):
+        '''this method is exposed to outside, not an async coroutine'''
+        # use asyncio to run action
+        # must call self.action(), not use self.action, because it must be a async coroutine
+        asyncio.get_event_loop().run_until_complete(self.action())
 
 
+threadWebSocket = WebSocketThread("websocket_server")
+threadWebSocket.start()
 
-def game_over(self):
+def game_over():
     print("\n\n")
     print( "███▀▀▀██ ███▀▀▀███ ███▀█▄█▀███ ██▀▀▀")
     print( "██    ██ ██     ██ ██   █   ██ ██   ")
@@ -88,4 +109,105 @@ def game_over(self):
     print( "██     ██   ██  █▀  ██    ██     ██ ")
     print( "███▄▄▄███    ▀█▀    ██▄▄▄ ██     ██▄")
     print("\n\n")
+    return True
 
+def check_winner ():
+    global buttons,clicked,count,root
+    arr = numpy.zeros((3,3))
+    cnt = 0
+    for x in buttons:
+        if x["text"] == "X":
+            i = cnt//3
+            j = cnt%3
+            arr[i][j] += 1
+        elif x["text"] == "O":
+            i = cnt//3
+            j = cnt%3
+            arr[i][j] -= 1
+            #elif self.s[i][j]["text"] == 'O':
+            #    arr[i][j] -= 1
+        cnt += 1
+    colsum = numpy.sum(arr,axis=0)
+    rowsum = numpy.sum(arr,axis=1)
+    if rowsum[0] == 3 or rowsum[1] == 3 or rowsum[2] == 3 or rowsum[0] == -3 or rowsum[1] == -3 or rowsum[2] == -3:
+        return game_over()
+    elif colsum[0] == 3 or colsum[1] == 3 or colsum[2] == 3 or colsum[0] == -3 or colsum[1] == -3 or colsum[2] == -3:
+        return game_over()
+    elif abs(arr[0][0]+arr[1][1]+arr[2][2]) == 3 or abs(arr[0][2]+arr[1][1]+arr[2][0]) == 3:
+        return game_over()
+    elif count == 9:
+        return game_over()
+    return False
+        
+def clicked():
+    global buttons,clicked,count,root
+    threadWebSocket.do_activate()
+    lbl.configure(text="Button was clicked !!")
+def bclick(r,c):
+    global buttons,clicked,count,root
+    d = r*3+c
+    cnt = 0
+    for x in buttons:
+        if cnt == d:
+            self.b_click(x)
+        cnt += 1
+
+def b_click(b):
+    global buttons,clicked,count,root
+    cnt = 0
+    for x in buttons:
+        if x == b:
+            R = cnt//3
+            C = cnt % 3
+        cnt += 1
+    
+    if b["text"] == " " and clicked == True:
+        b["text"] = "X"
+        clicked = False
+        count += 1
+        if check_winner():
+            messagebox.showinfo("Tic Tac Toe", "Hey X won" )
+            root.destroy()
+    elif b["text"] == " " and clicked == False:
+        b["text"] = "O"
+        clicked = True
+        count += 1
+        if check_winner():
+            messagebox.showinfo("Tic Tac Toe", "Hey O won" )
+            root.destroy()
+        #self.checkifwon()
+    else:
+        messagebox.showerror("Tic Tac Toe", "Hey! That box has already been selected\nPick Another Box..." )
+
+
+# 3 X 3 tictac
+
+root = Tk()
+root.title('Tic-Tac-Toe')
+clicked = True
+count = 0
+R = -1
+C = -1
+# btn = Button(root, text="Start Me", command=clicked)
+# btn.grid(column=4, row=2)
+b1 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b1))
+b2 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b2))
+b3 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b3))
+b4 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b4))
+b5 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b5))
+b6 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b6))
+b7 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b7))
+b8 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b8))
+b9 = Button(root, text=" ", font=("Helvetica", 20), height=3, width=6, bg="white", command=lambda: b_click(b9))
+
+b1.grid(row=0, column=0)
+b2.grid(row=0, column=1)
+b3.grid(row=0, column=2)
+b4.grid(row=1, column=0)
+b5.grid(row=1, column=1)
+b6.grid(row=1, column=2)
+b7.grid(row=2, column=0)
+b8.grid(row=2, column=1)
+b9.grid(row=2, column=2)
+buttons = [b1,b2,b3,b4,b5,b6,b7,b8,b9]
+root.mainloop()
