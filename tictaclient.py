@@ -18,7 +18,7 @@ class WebSocketThread (threading.Thread):
     def __init__(self,name):
         threading.Thread.__init__(self)
         self.name=name
-        self.uri = "ws://172.0.0.1:6789"
+        self.uri = "ws://127.0.0.1:6789"
         # self.USERS = set()
         print("Start thread", self.name)
 
@@ -39,10 +39,11 @@ class WebSocketThread (threading.Thread):
         websockets already ensures that a new thread is run for each client'''
         print("listen is called")
         async with websockets.connect(self.uri) as websocket:
-            print(" inside listen is called")
-            s = await websocket.recv()
-            print("recieved ",s)
-            await self.handle_message(int(s))
+            while True:
+                print(" inside listen is called")
+                s = await websocket.recv()
+                print("recieved ",s)
+                await self.handle_message(int(s))
 
             
     # message handler        
@@ -63,7 +64,7 @@ class WebSocketThread (threading.Thread):
         async with websockets.connect(self.uri) as websocket:
             message = str(cnt)
             print("sending" ,message)
-            await asyncio.send(message)
+            await websocket.send(message)
 
     # expose action
     def do_activate(self,cnt):
@@ -73,16 +74,8 @@ class WebSocketThread (threading.Thread):
         asyncio.get_event_loop().run_until_complete(self.action(cnt))
 
 
-#threadWebSocket = WebSocketThread("websocket_server")
-#threadWebSocket.start()
-async def listen():
-    uri = "ws://172.0.0.1:6789"
-    async with websockets.connect(uri) as websocket:
-        print(" inside listen is called")
-        s = await websocket.recv()
-        print("recieved ",s)
-
-asyncio.get_event_loop().run_until_complete(listen())
+threadWebSocket = WebSocketThread("websocket_server")
+threadWebSocket.start()
 
 def game_over():
     print("\n\n")
@@ -165,7 +158,7 @@ def b_click(b):
         b["text"] = "X"
         clicked = False
         count += 1
-        #threadWebSocket.do_activate(cnt)
+        threadWebSocket.do_activate(cnt)
         if check_winner():
             messagebox.showinfo("Tic Tac Toe", "Hey X won" )
             root.destroy()
@@ -173,7 +166,7 @@ def b_click(b):
         b["text"] = "O"
         clicked = True
         count += 1
-        #threadWebSocket.do_activate(cnt)
+        threadWebSocket.do_activate(cnt)
         if check_winner():
             messagebox.showinfo("Tic Tac Toe", "Hey O won" )
             root.destroy()

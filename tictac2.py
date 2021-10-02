@@ -41,7 +41,7 @@ class WebSocketThread (threading.Thread):
 
         # register new client #
         self.USERS.add(websocket)
-        await self.notify_users()
+        # await self.notify_users()
 
         # this loop to get massage from client #
         while True:
