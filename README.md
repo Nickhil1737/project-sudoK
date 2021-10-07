@@ -10,7 +10,8 @@ git clone https://github.com/Nickhil1737/project-sudoK.git
 cd project-sudoK
 ```
 * create a python venv and install requirements via pip
-``` pip install -r requirements.txt
+``` 
+pip install -r requirements.txt
 ```
 
 * one player should run the server program
