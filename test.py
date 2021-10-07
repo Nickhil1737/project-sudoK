@@ -1,172 +1,37 @@
-# this demonstrates a simple websocket server with GUI which sends messages to its clients
-
-# vuquangtrong@gmail.com
-
-
-
-from tkinter import *
-
-import json
-
-import asyncio
-
-import websockets
-
-import threading
-
-
-
-class WebSocketThread (threading.Thread):
-
-    '''WebSocketThread will make websocket run in an a new thread'''
-
-
-
-    # overide self init
-
-    def __init__(self,name):
-
-        threading.Thread.__init__(self)
-
-        self.name=name
-
-        self.USERS = set()
-
-        print("Start thread", self.name)
-
-
-
-    # overide run method
-
-    def run(self):
-
-        # must set a new loop for asyncio
-
-        asyncio.set_event_loop(asyncio.new_event_loop())
-
-        # setup a server
-
-        asyncio.get_event_loop().run_until_complete(websockets.serve(self.listen, 'localhost', 6789))
-
-        # keep thread running
-
-        asyncio.get_event_loop().run_forever()
-
-
-
-    # listener
-
-    async def listen(self, websocket, path):
-
-        '''listenner is called each time new client is connected
-
-        websockets already ensures that a new thread is run for each client'''
-
-
-
-        print("listen: ", websocket)
-
-
-
-        # register new client #
-
-        self.USERS.add(websocket)
-
-        await self.notify_users()
-
-
-
-        # this loop to get massage from client #
-
-        while True:
-
-            try:
-
-                msg = await websocket.recv()
-
-                if msg is None:
-
-                    break
-
-                await self.handle_message(client, msg)
-
-
-
-            except websockets.exceptions.ConnectionClosed:
-
-                print("close: ", websocket)
-
-                break
-
-
-
-        self.USERS.remove(websocket)
-
-        await self.notify_users()
-
-
-
-    # message handler
-
-    async def handle_message(self, client, data):
-
-        print("handle_message: ", client, data)
-
-
-
-    # example of an action
-
-    # action: notify
-
-    async def notify_users(self):
-
-        '''notify the number of current connected clients'''
-
-        if self.USERS: # asyncio.wait doesn't accept an empty list
-
-            message = json.dumps({'type': 'users', 'count': len(self.USERS)})
-
-            await asyncio.wait([user.send(message) for user in self.USERS])
-
-
-
-    # action: action
-
-    async def action(self):
-
-        '''this is an action which will be executed when user presses on button'''
-
-        if self.USERS: # asyncio.wait doesn't accept an empty list
-
-            message = json.dumps({'type': 'activation', 'count':'true'})
-
-            await asyncio.wait([user.send(message) for user in self.USERS])
-
-
-
-    # expose action
-
-    def do_activate(self):
-
-        '''this method is exposed to outside, not an async coroutine'''
-
-        # use asyncio to run action
-
-        # must call self.action(), not use self.action, because it must be a async coroutine
-
-        asyncio.get_event_loop().run_until_complete(self.action())
-
-
-
-
-
-# start WebSocketThread #
-
-threadWebSocket=WebSocketThread("websocket_server")
-
-threadWebSocket.start()
-
-
-
-# helper function for window
-
+        
+r = 0
+c = 0
+'''
+for r in range(3):
+    for c in range(3):
+        print("    def clicker"+str(r)+str(c)+" (self,event):")
+        print("        myLabel = Label(self.root, text=self.clicked"+str(r)+str(c)+".get()).grid(row=10,column=8)")
+        print("        val = 0")
+        print("        if self.clicked"+str(r)+str(c)+".get() != \"\":")
+        print("            val = int(self.clicked"+str(r)+str(c)+".get())")
+        print("        if self.check_sudoko_property("+str(r)+","+str(c)+",val) == False:")
+        print("            self.clicked"+str(r)+str(c)+".set(\"\")")
+        '''
+'''
+    def clicker00 (self,event):
+        myLabel = Label(self.root, text=self.clicked00.get()).grid(row=10,column=8)
+        val = 0
+        if self.clicked00.get() != "":
+            val = int(self.clicked00.get())
+        if self.check_sudoko_property("+str(r)+","+str(c)+",val) == False:
+            self.clicked00.set("")
+            '''
+for r in range(3):
+    for c in range(3):
+        print("        self.clicked"+str(r)+str(c) +" = StringVar()")
+        print("        self.clicked"+str(r)+str(c)+".set(self.options[0])")
+        print("        self.drop"+str(r)+str(c)+" = OptionMenu(self.root, self.clicked"+str(r)+str(c)+", *self.options, command=self.clicker"+str(r)+str(c)+")")
+        print("        self.drop"+str(r)+str(c)+".grid(row="+str(r)+",column="+str(c)+")")
+
+'''
+
+        self.clicked00 = StringVar()
+        self.clicked00.set(self.options[0])
+        self.drop00 = OptionMenu(self.root, self.clicked00, *self.options, command=self.clicker00)
+        self.drop00.grid(row=0,column=0)
+        '''
