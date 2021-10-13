@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 import numpy as np
 
 class SudoKo:
@@ -999,31 +1000,46 @@ class SudoKo:
 
 
     def check_sudoko_property(self,r,c,val,dosend=True):
-        if val in self.row_sets[r]:
-            myLabel = Label(self.root, text="found similar value in row").grid(row=12,column=2)
-            return False
-        if val in self.col_sets[c]:
-            myLabel = Label(self.root, text="found similar value in column").grid(row=12,column=2)
-            return False
         setnum = 0
         for x in range(9):
             if (r,c) in self.set_sets[x]:
                 print("found the set",x)
                 setnum = x
                 break
+        preval = self.matrix[r][c]
+        if val in self.row_sets[r]:
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            # messagebox.showerror("same number in row")
+            if preval != 0:
+                self.row_sets[r].remove(preval)
+                self.col_sets[c].remove(preval)
+                self.set_sets[setnum].remove(preval)
+            return False
+        if val in self.col_sets[c]:
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            # messagebox.showerror("same number in column")
+            if preval != 0:
+                self.row_sets[r].remove(preval)
+                self.col_sets[c].remove(preval)
+                self.set_sets[setnum].remove(preval)
+            return False
         if val in self.set_sets[setnum]:
-            myLabel = Label(self.root, text="found similar value in 3X3 box").grid(row=12,column=2)
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            messagebox.showerror("same number in box whick is important...")
+            if preval != 0:
+                self.row_sets[r].remove(preval)
+                self.col_sets[c].remove(preval)
+                self.set_sets[setnum].remove(preval)
             return False
         preval = self.matrix[r][c]
         if dosend:
             self.thread_websocket.do_activate(str(r)+str(c)+str(val))
         else:
-            if val > 0:
-                self.clickers[9*r+c].set(str(val))
+            self.clickers[9*r+c].set(self.options[val])
         if preval != 0:
-            self.row_sets[r].erase(preval)
-            self.col_sets[c].erase(preval)
-            self.set_sets[setnum].erase(preval)
+            self.row_sets[r].remove(preval)
+            self.col_sets[c].remove(preval)
+            self.set_sets[setnum].remove(preval)
         if val == 0:
             self.matrix[r][c] = 0
             return True
