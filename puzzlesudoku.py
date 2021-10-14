@@ -22,4 +22,13 @@ class CreateSudokuPuzzle:
         random.shuffle(arrp)
         x = random.randint(16,20)
         self.arrp = arrp[:x]
+        self.filled_boxes = []
+        for x in self.arrp:
+            r = x//9
+            c = x%9
+            v = self.sudoku[r][c]
+            self.filled_boxes.append(str(r)+str(c)+str(v))
+
+# t1 = CreateSudokuPuzzle()
+# print(t1.filled_boxes)
 

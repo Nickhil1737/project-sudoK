@@ -1,8 +1,8 @@
 import os
-from sudotk import SudoKo
 import asyncio
 import websockets
 import threading
+from sudotk import SudoKu
 
 class WebSocketThread (threading.Thread):
     global t1
@@ -67,5 +67,5 @@ class WebSocketThread (threading.Thread):
 threadWebSocket = WebSocketThread("websocket_server")
 threadWebSocket.start()
 
-t1 = SudoKo(threadWebSocket)
+t1 = SudoKu(threadWebSocket)
 t1.root.mainloop()

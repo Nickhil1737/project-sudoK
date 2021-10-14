@@ -1,14 +1,13 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import numpy as np
 
-class SudoKo:
+class SudoKu:
     def __init__(self,threadob=None):
         self.root = Tk()
-        self.root.title('SudoKo')
+        self.root.title('SudoKu')
         self.root.geometry("400x400")
-        self.matrix = np.zeros((9,9))
+        self.matrix = [[0 for _ in range(9)] for _ in range(9)]
         self.set_names = []
         self.row_sets = []
         self.col_sets = []
@@ -1010,33 +1009,35 @@ class SudoKo:
         print(setnum)
         preval = self.matrix[r][c]
         if val in self.row_sets[r]:
-            # self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
             # messagebox.showerror("same number in row")
             if preval != 0:
+                self.matrix[r][c] = 0
                 self.row_sets[r].remove(preval)
                 self.col_sets[c].remove(preval)
                 self.set_sets[setnum].remove(preval)
             return False
         if val in self.col_sets[c]:
-            # self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
             # messagebox.showerror("same number in column")
             if preval != 0:
+                self.matrix[r][c] = 0
                 self.row_sets[r].remove(preval)
                 self.col_sets[c].remove(preval)
                 self.set_sets[setnum].remove(preval)
             return False
         if val in self.set_sets[setnum]:
-            # self.thread_websocket.do_activate(str(r)+str(c)+str(0))
+            self.thread_websocket.do_activate(str(r)+str(c)+str(0))
             messagebox.showerror("same number in box whick is important...")
             if preval != 0:
+                self.matrix[r][c] = 0
                 self.row_sets[r].remove(preval)
                 self.col_sets[c].remove(preval)
                 self.set_sets[setnum].remove(preval)
             return False
         preval = self.matrix[r][c]
         if dosend:
-            pass
-            # self.thread_websocket.do_activate(str(r)+str(c)+str(val))
+            self.thread_websocket.do_activate(str(r)+str(c)+str(val))
         else:
             self.clickers[9*r+c].set(self.options[val])
         if preval != 0:
@@ -1070,5 +1071,5 @@ class SudoKo:
 
         # for x in self.set_names:
             # print(x)
-t1 = SudoKo()
-t1.root.mainloop()
+# t1 = SudoKu()
+# t1.root.mainloop()
