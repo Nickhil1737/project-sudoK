@@ -13,29 +13,32 @@ class SudoKu:
         self.col_sets = []
         self.set_sets = []
         self.make_sets()
+        self.options_list = [[["","1","2","3","4","5","6","7","8","9" ]	for _ in range(9)] for _ in range(9)]
+        fileob = open("sudoku_state_zero.txt","r")
+        r = 0
+        for x in fileob:
+            for c in range(9):
+                v = int(x[c])
+                if v == 0:
+                    continue
+                self.matrix[r][c] = v
+                self.row_sets[r].add(v)
+                self.col_sets[c].add(v)
+                self.options_list[r][c] = [str(v)]
+                for i in range(9):
+                    if (r,c) in self.set_names[i]:
+                        self.set_sets[i].add(v)
+            r += 1
+            if r == 9:
+                break
+                
+
         self.filled_boxes = []
-        if puzzleob:
-            self.filled_boxes = puzzleob.filled_boxes
-        else:
-            self.filled_boxes = threadob.filled_boxes
         self.thread_websocket = threadob
         self.clickers = []
 
 # Drop Down Boxes
 
-        self.options_list = [[["","1","2","3","4","5","6","7","8","9" ]	for _ in range(9)] for _ in range(9)]
-        print(self.filled_boxes)
-        for x in self.filled_boxes:
-            r = int(x[0])
-            c = int(x[1])
-            v = int(x[2])
-            self.matrix[r][c] = v
-            self.row_sets[r].add(v)
-            self.col_sets[c].add(v)
-            self.options_list[r][c] = [str(v)]
-            for i in range(9):
-                if (r,c) in self.set_names[i]:
-                    self.set_sets[i].add(v)
         self.options = ["","1","2","3","4","5","6","7","8","9" ]	
 
         self.clicked00 = StringVar()
@@ -1020,15 +1023,13 @@ class SudoKu:
         setnum = 0
         for x in range(9):
             if (r,c) in self.set_names[x]:
-                print("found the set",x)
-                # print("*******************")
                 setnum = x
                 break
         print(setnum)
         preval = self.matrix[r][c]
         if val in self.row_sets[r]:
             self.thread_websocket.do_activate(str(r)+str(c)+str(0))
-            # messagebox.showerror("same number in row")
+            messagebox.showerror("same number in row")
             if preval != 0:
                 self.matrix[r][c] = 0
                 self.row_sets[r].remove(preval)
@@ -1037,7 +1038,7 @@ class SudoKu:
             return False
         if val in self.col_sets[c]:
             self.thread_websocket.do_activate(str(r)+str(c)+str(0))
-            # messagebox.showerror("same number in column")
+            messagebox.showerror("same number in column")
             if preval != 0:
                 self.matrix[r][c] = 0
                 self.row_sets[r].remove(preval)
@@ -1089,5 +1090,3 @@ class SudoKu:
 
         # for x in self.set_names:
             # print(x)
-# t1 = SudoKu()
-# t1.root.mainloop()
