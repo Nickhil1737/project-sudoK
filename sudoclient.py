@@ -4,6 +4,7 @@ import websockets
 import threading
 from sudotk import SudoKu
 
+
 class WebSocketThread (threading.Thread):
     global t1
     '''WebSocketThread will make websocket run in an a new thread'''
@@ -13,6 +14,8 @@ class WebSocketThread (threading.Thread):
         threading.Thread.__init__(self)
         self.name=name
         self.uri = "ws://127.0.0.1:6789"
+        self.add_to_list = True
+        self.filled_boxes = []
         # self.USERS = set()
         print("Start thread", self.name)
 
@@ -38,7 +41,7 @@ class WebSocketThread (threading.Thread):
                 await self.handle_message(s)
 
             
-    # message handler        
+    # message handler 
     async def handle_message(self,data):
         print("handle_message: ", data)
         r = int(data[0])

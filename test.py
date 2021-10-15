@@ -6,6 +6,7 @@ for r in range(9):
     for c in range(9):
         print("        self.clickers.append(self.clicked"+str(r)+str(c)+")")
 '''
+'''
 for r in range(9):
     for c in range(9):
         print("    def clicker"+str(r)+str(c)+" (self,event):")
@@ -16,6 +17,7 @@ for r in range(9):
         print("        if self.check_sudoko_property("+str(r)+","+str(c)+",val) == False:")
         print("            self.clicked"+str(r)+str(c)+".set(\"\")")
 '''
+'''
     def clicker00 (self,event):
         myLabel = Label(self.root, text=self.clicked00.get()).grid(row=10,column=8)
         val = 0
@@ -24,14 +26,12 @@ for r in range(9):
         if self.check_sudoko_property("+str(r)+","+str(c)+",val) == False:
             self.clicked00.set("")
             '''
-'''
 for r in range(9):
     for c in range(9):
         print("        self.clicked"+str(r)+str(c) +" = StringVar()")
-        print("        self.clicked"+str(r)+str(c)+".set(self.options[0])")
-        print("        self.drop"+str(r)+str(c)+" = OptionMenu(self.root, self.clicked"+str(r)+str(c)+", *self.options, command=self.clicker"+str(r)+str(c)+")")
+        print("        self.clicked"+str(r)+str(c)+".set(self.options_list["+str(r)+"]["+str(c)+"][0])")
+        print("        self.drop"+str(r)+str(c)+" = OptionMenu(self.root, self.clicked"+str(r)+str(c)+", *self.options_list["+str(r)+"]["+str(c)+"], command=self.clicker"+str(r)+str(c)+")")
         print("        self.drop"+str(r)+str(c)+".grid(row="+str(r)+",column="+str(c)+")")
-'''
 '''
 
         self.clicked00 = StringVar()

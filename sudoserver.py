@@ -3,6 +3,7 @@ import asyncio
 import websockets
 import threading
 from sudotk import SudoKu
+from puzzlesudoku import CreateSudokuPuzzle
 
 class WebSocketThread (threading.Thread):
     '''WebSocketThread will make websocket run in an a new thread'''
@@ -12,6 +13,7 @@ class WebSocketThread (threading.Thread):
         threading.Thread.__init__(self)
         self.name=name
         self.USERS = set()
+        self.send_puzzle = True
         print("Start thread", self.name)
 
     # overide run method
@@ -78,5 +80,6 @@ class WebSocketThread (threading.Thread):
 
 threadWebSocket = WebSocketThread("websocket_server")
 threadWebSocket.start()
-t1 = SudoKu(threadob = threadWebSocket)
+puzzle = CreateSudokuPuzzle()
+t1 = SudoKu(threadob = threadWebSocket,puzzleob=puzzle)
 t1.root.mainloop()
