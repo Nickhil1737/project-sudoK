@@ -81,5 +81,5 @@ class WebSocketThread (threading.Thread):
 threadWebSocket = WebSocketThread("websocket_server")
 threadWebSocket.start()
 puzzle = CreateSudokuPuzzle()
-t1 = SudoKu(threadob = threadWebSocket,puzzleob=puzzle)
+t1 = SudoKu(threadob = threadWebSocket)
 t1.root.mainloop()
